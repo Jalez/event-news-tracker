@@ -1,0 +1,67 @@
+@startuml
+title System Architecture Diagram
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam arrowColor Black
+skinparam packageBorderColor Black
+skinparam packageTitleColor Black
+
+actor User
+
+package "Frontend Layer (React)" {
+    component "Search/Filter Component" as SearchFilter
+    component "Visualization Components" as Visualization
+    component "Settings Component" as Settings
+    component "State Management" as StateManagement
+    component "REST API Calls" as RESTAPICalls
+}
+
+package "Backend Layer (Java with Spring Boot)" {
+    component "Controller Layer\n(REST API)" as Controller
+    component "Service Layer" as Service
+    component "Persistence Layer\n(Optional)" as Persistence
+}
+
+package "External API Layer" {
+    component "Ticketmaster API" as TicketmasterAPI
+    component "News API" as NewsAPI
+}
+
+' User Interactions
+User --> SearchFilter : Enters search criteria
+User --> Settings : Sets preferences
+
+' Frontend Interactions
+SearchFilter --> RESTAPICalls : Sends GET /combined request
+Settings --> StateManagement : Saves preferences
+RESTAPICalls --> Controller : HTTP Request
+
+' Backend Processing
+Controller --> Service : Delegates request
+Service --> TicketmasterAPI : Fetches events data
+Service --> NewsAPI : Fetches news data
+TicketmasterAPI --> Service : Returns events data
+NewsAPI --> Service : Returns news data
+Service --> Persistence : Stores user data (if applicable)
+Service --> Controller : Sends combined data
+
+' Response to Frontend
+Controller --> RESTAPICalls : HTTP Response
+RESTAPICalls --> Visualization : Updates UI components
+StateManagement --> Visualization : Provides state data
+
+' Data Flow Labels
+note right of Service
+  Combines and processes data
+end note
+
+note right of Controller
+  Sends combined data to the frontend
+end note
+
+note right of Visualization
+  Renders maps, charts,\nand timelines
+end note
+
+@enduml
